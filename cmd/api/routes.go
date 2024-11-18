@@ -49,8 +49,10 @@ func (a *applicationDependencies) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", a.activateUserHandler)
 
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", a.createAuthenticationTokenHandler)
+
 	// Request sent first to recoverPanic() then sent to rateLimit()
 	// finally it is sent to the router.
-	return a.recoverPanic(a.rateLimit(router))
+	return a.recoverPanic(a.rateLimit(a.authenticate(router)))
 
 }

@@ -1,12 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/georgie5/Test3-bookclubapi/internal/data"
+	"github.com/georgie5/Test3-bookclubapi/internal/validator"
 	"golang.org/x/time/rate"
 )
 
@@ -85,4 +89,56 @@ func (a *applicationDependencies) rateLimit(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 
+}
+
+func (a *applicationDependencies) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Add("Vary", "Authorization")
+
+		// Get the Authorization header from the request. It should have the
+		// Bearer token
+		authorizationHeader := r.Header.Get("Authorization")
+
+		// If there is no Authorization header then we have an Anonymous user
+		if authorizationHeader == "" {
+			r = a.contextSetUser(r, data.AnonymousUser)
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		headerParts := strings.Split(authorizationHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			a.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// Get the actual token
+		token := headerParts[1]
+		// Validate
+		v := validator.New()
+
+		data.ValidateTokenPlaintext(v, token)
+		if !v.IsEmpty() {
+			a.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+		// Get the user info associated with this authentication token
+		user, err := a.userModel.GetForToken(data.ScopeAuthentication, token)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				a.invalidAuthenticationTokenResponse(w, r)
+			default:
+				a.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+
+		// Add the retrieved user info to the context
+		r = a.contextSetUser(r, user)
+
+		// Call the next handler in the chain.
+		next.ServeHTTP(w, r)
+	})
 }
