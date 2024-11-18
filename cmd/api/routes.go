@@ -19,27 +19,27 @@ func (a *applicationDependencies) routes() http.Handler {
 
 	//Books routes
 	//Books routes
-	router.HandlerFunc(http.MethodGet, "/api/v1/books/search", a.searchBooksHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/books", a.listBooksHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/books", a.createBookHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/books/:book_id", a.getBookHandler)
-	router.HandlerFunc(http.MethodPut, "/v1/books/:book_id", a.updateBookHandler)
-	router.HandlerFunc(http.MethodDelete, "/v1/books/:book_id", a.deleteBookHandler)
+	router.HandlerFunc(http.MethodGet, "/api/v1/books/search", a.requireActivatedUser(a.searchBooksHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/books", a.requireActivatedUser(a.listBooksHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/books", a.requireActivatedUser(a.createBookHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/books/:book_id", a.requireActivatedUser(a.getBookHandler))
+	router.HandlerFunc(http.MethodPut, "/v1/books/:book_id", a.requireActivatedUser(a.updateBookHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/books/:book_id", a.requireActivatedUser(a.deleteBookHandler))
 
 	// Reading lists routes
-	router.HandlerFunc(http.MethodGet, "/api/v1/lists", a.listReadingListsHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:list_id", a.getReadingListHandler)
-	router.HandlerFunc(http.MethodPost, "/api/v1/lists", a.createReadingListHandler)
-	router.HandlerFunc(http.MethodPut, "/api/v1/lists/:list_id", a.updateReadingListHandler)
-	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:list_id", a.deleteReadingListHandler)
-	router.HandlerFunc(http.MethodPost, "/api/v1/lists/:list_id/books", a.addBookToReadingListHandler)
-	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:list_id/books", a.removeBookFromReadingListHandler)
+	router.HandlerFunc(http.MethodGet, "/api/v1/lists", a.requireActivatedUser(a.listReadingListsHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/lists/:list_id", a.requireActivatedUser(a.getReadingListHandler))
+	router.HandlerFunc(http.MethodPost, "/api/v1/lists", a.requireActivatedUser(a.createReadingListHandler))
+	router.HandlerFunc(http.MethodPut, "/api/v1/lists/:list_id", a.requireActivatedUser(a.updateReadingListHandler))
+	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:list_id", a.requireActivatedUser(a.deleteReadingListHandler))
+	router.HandlerFunc(http.MethodPost, "/api/v1/lists/:list_id/books", a.requireActivatedUser(a.addBookToReadingListHandler))
+	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:list_id/books", a.requireActivatedUser(a.removeBookFromReadingListHandler))
 
 	// Reviews routes
-	router.HandlerFunc(http.MethodGet, "/v1/books/:book_id/reviews", a.getReviewsForBookHandler) // Get reviews for a specific book
-	router.HandlerFunc(http.MethodPost, "/v1/books/:book_id/reviews", a.addReviewHandler)        // Add a new review to a specific book
-	router.HandlerFunc(http.MethodPut, "/v1/reviews/:review_id", a.updateReviewHandler)          // Update a review
-	router.HandlerFunc(http.MethodDelete, "/v1/reviews/:review_id", a.deleteReviewHandler)       // Delete a review
+	router.HandlerFunc(http.MethodGet, "/v1/books/:book_id/reviews", a.requireActivatedUser(a.getReviewsForBookHandler)) // Get reviews for a specific book
+	router.HandlerFunc(http.MethodPost, "/v1/books/:book_id/reviews", a.requireActivatedUser(a.addReviewHandler))        // Add a new review to a specific book
+	router.HandlerFunc(http.MethodPut, "/v1/reviews/:review_id", a.requireActivatedUser(a.updateReviewHandler))          // Update a review
+	router.HandlerFunc(http.MethodDelete, "/v1/reviews/:review_id", a.requireActivatedUser(a.deleteReviewHandler))       // Delete a review
 
 	// Users routes
 	router.HandlerFunc(http.MethodPost, "/v1/users", a.registerUserHandler)
