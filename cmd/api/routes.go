@@ -34,7 +34,7 @@ func (a *applicationDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:list_id", a.requireActivatedUser(a.deleteReadingListHandler))
 	router.HandlerFunc(http.MethodPost, "/api/v1/lists/:list_id/books", a.requireActivatedUser(a.addBookToReadingListHandler))
 	router.HandlerFunc(http.MethodDelete, "/api/v1/lists/:list_id/books", a.requireActivatedUser(a.removeBookFromReadingListHandler))
-
+																				
 	// Reviews routes
 	router.HandlerFunc(http.MethodGet, "/v1/books/:book_id/reviews", a.requireActivatedUser(a.getReviewsForBookHandler)) // Get reviews for a specific book
 	router.HandlerFunc(http.MethodPost, "/v1/books/:book_id/reviews", a.requireActivatedUser(a.addReviewHandler))        // Add a new review to a specific book
@@ -51,8 +51,10 @@ func (a *applicationDependencies) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", a.createAuthenticationTokenHandler)
 
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/password-reset", a.createPasswordResetTokenHandler)
+	router.HandlerFunc(http.MethodPut, "/v1/users/password", a.updateUserPasswordHandler)
 	// Request sent first to recoverPanic() then sent to rateLimit()
 	// finally it is sent to the router.
-	return a.recoverPanic(a.rateLimit(a.authenticate(router)))
+	return a.recoverPanic(a.enableCORS(a.rateLimit(a.authenticate(router))))
 
 }

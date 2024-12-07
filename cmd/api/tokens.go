@@ -74,3 +74,64 @@ func (a *applicationDependencies) createAuthenticationTokenHandler(w http.Respon
 	}
 
 }
+func (a *applicationDependencies) createPasswordResetTokenHandler(w http.ResponseWriter, r *http.Request) {
+    var incomingData struct {
+        Email string `json:"email"`
+    }
+
+    err := a.readJSON(w, r, &incomingData)
+    if err != nil {
+        a.badRequestResponse(w, r, err)
+        return
+    }
+
+    v := validator.New()
+    data.ValidateEmail(v, incomingData.Email)
+
+    if !v.IsEmpty() {
+        a.failedValidationResponse(w, r, v.Errors)
+        return
+    }
+
+    user, err := a.userModel.GetByEmail(incomingData.Email)
+    if err != nil {
+        switch {
+        case errors.Is(err, data.ErrRecordNotFound):
+            a.invalidCredentialsResponse(w, r)
+        default:
+            a.serverErrorResponse(w, r, err)
+        }
+        return
+    }
+
+    if !user.Activated {
+        a.inactiveAccountResponse(w, r)
+        return
+    }
+
+    token, err := a.tokenModel.New(user.ID, 30*time.Minute, data.ScopePasswordReset)
+    if err != nil {
+        a.serverErrorResponse(w, r, err)
+        return
+    }
+
+	a.background(func() {
+		
+		data := envelope{
+			"passwordResetToken": token.Plaintext,
+		}
+
+		err = a.mailer.Send(user.Email, "password_reset.tmpl", data)
+		if err != nil {
+			a.logger.Error(err.Error())
+		}
+	})
+
+    envelope := envelope{
+		"message": "an email will be sent to you containing password reset instructions",
+	}
+    err = a.writeJSON(w, http.StatusAccepted, envelope, nil)
+    if err != nil {
+        a.serverErrorResponse(w, r, err)
+    }
+}

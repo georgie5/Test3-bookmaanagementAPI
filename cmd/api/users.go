@@ -233,3 +233,72 @@ func (a *applicationDependencies) getUserReviewsHandler(w http.ResponseWriter, r
 		a.serverErrorResponse(w, r, err)
 	}
 }
+
+// Update user password
+func (a *applicationDependencies) updateUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	
+	var incomingData struct {
+		Password string `json:"password"`
+		TokenPlaintext string `json:"token"`
+	}
+
+	err := a.readJSON(w, r, &incomingData)
+	if err != nil {
+		a.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	data.ValidatePasswordPlaintext(v, incomingData.Password) 
+	data.ValidateTokenPlaintext(v, incomingData.TokenPlaintext)
+
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// Fetch the user record from the database using the token
+	user, err := a.userModel.GetForToken(data.ScopePasswordReset, incomingData.TokenPlaintext)
+	if err != nil {
+		switch {
+        case errors.Is(err, data.ErrRecordNotFound):
+            v.AddError("token", "invalid or expired password reset token")
+            a.failedValidationResponse(w, r, v.Errors)
+        default:
+            a.serverErrorResponse(w, r, err)
+        }
+        return
+	}
+
+	err = user.Password.Set(incomingData.Password)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = a.userModel.Update(user)
+	if err != nil {
+		switch {
+        case errors.Is(err, data.ErrEditConflict):
+            a.editConflictResponse(w, r)
+        default:
+            a.serverErrorResponse(w, r, err)
+        }
+        return
+	}
+
+	err = a.tokenModel.DeleteAllForUser(data.ScopePasswordReset, user.ID) 
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+
+	envelope := envelope{
+		"message": "Your password has been updated",
+	}
+	err = a.writeJSON(w, http.StatusOK, envelope, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+	}
+
+}

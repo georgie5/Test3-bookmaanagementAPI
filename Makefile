@@ -4,7 +4,8 @@ include .envrc
 .PHONY: run
 run:
 	@echo  'Running application…'
-	@go run ./cmd/api -port=4000 -env=development -limiter-burst=5 -limiter-rps=2 -limiter-enabled=true -db-dsn=$(BOOKCLUB_DB_DSN)
+	@go run ./cmd/api -port=4000 -env=development -limiter-burst=5 -limiter-rps=2 -limiter-enabled=true -cors-trusted-origins="http://localhost:9000 http://localhost:9001"
+ -db-dsn=$(BOOKCLUB_DB_DSN)
 
 ## db/psql: connect to the database using psql (terminal)
 .PHONY: db/psql

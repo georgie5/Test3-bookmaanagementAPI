@@ -132,15 +132,15 @@ func (a *applicationDependencies) getSingleQueryParameter(queryParameters url.Va
 }
 
 // call when we have multiple comma-separated values
-func (a *applicationDependencies) getMultipleQueryParameters(queryParameters url.Values, key string, defaultValue []string) []string {
+// func (a *applicationDependencies) getMultipleQueryParameters(queryParameters url.Values, key string, defaultValue []string) []string {
 
-	result := queryParameters.Get(key)
-	if result == "" {
-		return defaultValue
-	}
-	return strings.Split(result, ",")
+// 	result := queryParameters.Get(key)
+// 	if result == "" {
+// 		return defaultValue
+// 	}
+// 	return strings.Split(result, ",")
 
-}
+// }
 
 // this method can cause a validation error when trying to convert the
 // string to a valid integer value

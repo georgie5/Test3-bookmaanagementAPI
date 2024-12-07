@@ -177,3 +177,31 @@ func (a *applicationDependencies) requireActivatedUser(next http.HandlerFunc) ht
 	// actually authenticated.
 	return a.requireAuthenticatedUser(fn)
 }
+
+func (a *applicationDependencies) enableCORS (next http.Handler) http.Handler {                             
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+ 
+		 w.Header().Add("Vary", "Origin")
+		 w.Header().Add("Vary", "Access-Control-Request-Method")
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			for i:= range a.config.cors.trustedOrigins {
+				if origin == a.config.cors.trustedOrigins[i] {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					// check if it is a Preflight CORS request
+					if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
+						w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, PATCH, DELETE")
+		 				w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+						w.WriteHeader(http.StatusOK)
+             		 	return
+          			}
+
+					break
+				}
+			}
+		}
+
+		 next.ServeHTTP(w, r)
+	 })
+ }
+ 

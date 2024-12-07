@@ -24,6 +24,12 @@ type Token struct {
 	Scope     string    `json:"-"`
 }
 
+// Our access to the database
+type TokenModel struct {
+	DB *sql.DB
+}
+
+
 // Generate a token for the user
 func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
 	token := &Token{
@@ -39,7 +45,7 @@ func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error
 	if err != nil {
 		return nil, err
 	}
-	// Encode the random bytes using base-32
+	// Encode the random bytes using base-32 and store it into token.Plaintext for readability
 	token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 	// Now we hash the encoding.
 	hash := sha256.Sum256([]byte(token.Plaintext))
@@ -54,10 +60,7 @@ func ValidateTokenPlaintext(v *validator.Validator, tokenPlaintext string) {
 	v.Check(len(tokenPlaintext) == 26, "token", "must be 26 bytes long")
 }
 
-// Our access to the database
-type TokenModel struct {
-	DB *sql.DB
-}
+const ScopePasswordReset = "password_reset"
 
 // The New() method creates and returns a new token. It calls Insert() as a
 // helper method
@@ -99,3 +102,5 @@ func (t TokenModel) DeleteAllForUser(scope string, userID int64) error {
 	_, err := t.DB.ExecContext(ctx, query, scope, userID)
 	return err
 }
+
+
