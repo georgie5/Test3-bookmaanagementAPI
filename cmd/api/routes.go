@@ -18,7 +18,6 @@ func (a *applicationDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", a.healthcheckHandler)
 
 	//Books routes
-	//Books routes
 	router.HandlerFunc(http.MethodGet, "/api/v1/books/search", a.requireActivatedUser(a.searchBooksHandler))
 	router.HandlerFunc(http.MethodGet, "/v1/books", a.requireActivatedUser(a.listBooksHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/books", a.requireActivatedUser(a.createBookHandler))
@@ -43,9 +42,9 @@ func (a *applicationDependencies) routes() http.Handler {
 
 	// Users routes
 	router.HandlerFunc(http.MethodPost, "/v1/users", a.registerUserHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/users/:user_id", a.getUserProfileHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/users/:user_id/lists", a.getUserReadingListsHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/users/:user_id/reviews", a.getUserReviewsHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/users/:user_id",  a.requireActivatedUser(a.getUserProfileHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/users/:user_id/lists",  a.requireActivatedUser(a.getUserReadingListsHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/users/:user_id/reviews",  a.requireActivatedUser(a.getUserReviewsHandler))
 
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", a.activateUserHandler)
 
