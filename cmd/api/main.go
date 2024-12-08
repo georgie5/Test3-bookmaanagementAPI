@@ -14,7 +14,7 @@ import (
 	"github.com/georgie5/Test3-bookclubapi/internal/mailer"
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
-
+ 
 const appVersion = "1.0.0"
 
 type serverConfig struct {
