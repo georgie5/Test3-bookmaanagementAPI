@@ -28,7 +28,10 @@ func ValidateReadingList(v *validator.Validator, r *ReadingList) {
 	v.Check(r.Name != "", "name", "must be provided")
 	v.Check(r.Description != "", "description", "must be provided")
 	v.Check(r.CreatedBy > 0, "created_by", "must be valid")
-	v.Check(r.Status == "currently reading" || r.Status == "completed", "status", "must be either 'draft' or 'published'")
+	if r.Status == "" {
+		r.Status = "currently reading"
+	}
+	v.Check(r.Status == "currently reading" || r.Status == "completed", "status", "must be either 'currently reading' or 'completed'")
 }
 
 func (m *ReadingListModel) Insert(r *ReadingList) error {

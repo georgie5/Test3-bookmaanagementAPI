@@ -10,19 +10,7 @@ This document provides `curl` commands for interacting with the API endpoints.
 curl -X GET http://localhost:4000/v1/healthcheck
 ```
 
-### Book routes
-
-#### Search Books
-
-```sh
-curl -X GET http://localhost:4000/api/v1/books/search -H "Authorization: Bearer YOUR_TOKEN"
-```
-
-#### List Books
-
-```sh
-curl -X GET http://localhost:4000/v1/books -H "Authorization: Bearer YOUR_TOKEN"
-```
+### Book routes ---------------------------------------------------------------------
 
 #### Create Book
 
@@ -33,7 +21,7 @@ curl -X POST http://localhost:4000/v1/books -d '{
   "isbn": "9780060853983",
   "publication_date": "1990-05-01",
   "genre": "Fantasy",
-  "description": "A comedic novel about the birth of the son of Satan and the coming of the End Times."
+  "description": "A comedic novel of the End Times."
 }' -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_AUTH_TOKEN"
 ```
 
@@ -43,12 +31,38 @@ curl -X POST http://localhost:4000/v1/books -d '{
 curl -X GET http://localhost:4000/v1/books/:book_id -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
+#### Search Books
+
+#### Search Books by Title
+
+```sh
+curl -X GET "http://localhost:4000/api/v1/books/search?title=BookTitle" -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+#### Search Books by Author
+
+```sh
+curl -X GET "http://localhost:4000/api/v1/books/search?author=AuthorName" -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+#### Search Books by Genre
+
+```sh
+curl -X GET "http://localhost:4000/api/v1/books/search?genre=GenreName" -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+#### List Books
+
+```sh
+curl -X GET http://localhost:4000/v1/books -H "Authorization: Bearer YOUR_TOKEN"
+```
+
 #### Update Book
 
 ```sh
 curl -X PUT http://localhost:4000/v1/books/:book_id -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
     "title": "Updated Book Title",
-    "author": "Updated Author Name",
+    "authors": "Updated Author Name",
     "isbn": "9780060853983",
     "publication_date": "1990-05-01",
     "genre": "Updated Genre",
@@ -62,7 +76,27 @@ curl -X PUT http://localhost:4000/v1/books/:book_id -H "Authorization: Bearer YO
 curl -X DELETE http://localhost:4000/v1/books/:book_id -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-### Reading List routes
+### Reading List routes ----------------------------------------------------------------
+
+#### Create Reading List
+
+```sh
+curl -X POST http://localhost:4000/api/v1/lists -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
+    "name": "Reading List Name",
+    "description": "Description of the reading list",
+    "created_by": :userid,
+    "status": "currently reading"
+}'
+```
+
+#### Update Reading List
+
+```sh
+curl -X PUT http://localhost:4000/api/v1/lists/:list_id -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
+    "name": "Updated Reading List Name",
+    "description": "Updated description of the reading list"
+}'
+```
 
 #### List Reading Lists
 
@@ -74,24 +108,6 @@ curl -X GET http://localhost:4000/api/v1/lists -H "Authorization: Bearer YOUR_TO
 
 ```sh
 curl -X GET http://localhost:4000/api/v1/lists/:list_id -H "Authorization: Bearer YOUR_TOKEN"
-```
-
-#### Create Reading List
-
-```sh
-curl -X POST http://localhost:4000/api/v1/lists -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
-    "name": "Reading List Name",
-    "description": "Description of the reading list"
-}'
-```
-
-#### Update Reading List
-
-```sh
-curl -X PUT http://localhost:4000/api/v1/lists/:list_id -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
-    "name": "Updated Reading List Name",
-    "description": "Updated description of the reading list"
-}'
 ```
 
 #### Delete Reading List
@@ -116,7 +132,17 @@ curl -X DELETE http://localhost:4000/api/v1/lists/:list_id/books -H "Authorizati
 }'
 ```
 
-### Review routes
+### Review routes -------------------------------------------------------------------------
+
+#### Add Review
+
+```sh
+curl -X POST http://localhost:4000/v1/books/:book_id/reviews -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
+    "user_id": :user_id,
+    "rating": 5,
+    "comment": "Great book!"
+}'
+```
 
 #### Get Reviews for Book
 
@@ -124,21 +150,12 @@ curl -X DELETE http://localhost:4000/api/v1/lists/:list_id/books -H "Authorizati
 curl -X GET http://localhost:4000/v1/books/:book_id/reviews -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-#### Add Review
-
-```sh
-curl -X POST http://localhost:4000/v1/books/:book_id/reviews -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
-    "rating": 5,
-    "comment": "Great book!"
-}'
-```
-
 #### Update Review
 
 ```sh
 curl -X PUT http://localhost:4000/v1/reviews/:review_id -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{
     "rating": 4,
-    "comment": "Updated review comment"
+    "review": "Updated review comment"
 }'
 ```
 
@@ -148,7 +165,7 @@ curl -X PUT http://localhost:4000/v1/reviews/:review_id -H "Authorization: Beare
 curl -X DELETE http://localhost:4000/v1/reviews/:review_id -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-### User routes
+### User routes ---------------------------------------------------------------------------
 
 #### Register User
 
